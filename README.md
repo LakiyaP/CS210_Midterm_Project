@@ -213,3 +213,95 @@ public:
     }
 };
 #endif //CSVREADER_H
+
+#ifndef SCHOOLBST_H
+#define SCHOOLBST_H
+
+#include "School.h"
+#include <iostream>
+
+class BSTNode {
+public:
+    School school;
+    BSTNode* left;
+    BSTNode* right;
+
+    BSTNode(School s) : school(s), left(nullptr), right(nullptr) {}
+};
+
+class SchoolBST {
+private:
+    BSTNode* root;
+
+    BSTNode* insert(BSTNode* node, School school) {
+        if (node == nullptr) return new BSTNode(school);
+
+        if (school.name < node->school.name)
+            node->left = insert(node->left, school);
+        else if (school.name > node->school.name)
+            node->right = insert(node->right, school);
+
+        return node;
+    }
+
+    BSTNode* findMin(BSTNode* node) {
+        while (node->left) node = node->left;
+        return node;
+    }
+
+    BSTNode* deleteByName(BSTNode* node, std::string name) {
+        if (!node) return node;
+
+        if (name < node->school.name)
+            node->left = deleteByName(node->left, name);
+        else if (name > node->school.name)
+            node->right = deleteByName(node->right, name);
+        else {
+            if (!node->left) {
+                BSTNode* temp = node->right;
+                delete node;
+                return temp;
+            } else if (!node->right) {
+                BSTNode* temp = node->left;
+                delete node;
+                return temp;
+            }
+
+            BSTNode* temp = findMin(node->right);
+            node->school = temp->school;
+            node->right = deleteByName(node->right, temp->school.name);
+        }
+        return node;
+    }
+
+    BSTNode* findByName(BSTNode* node, std::string name) {
+        if (!node || node->school.name == name) return node;
+        if (name < node->school.name) return findByName(node->left, name);
+        return findByName(node->right, name);
+    }
+
+    void displayInOrder(BSTNode* node) {
+        if (!node) return;
+        displayInOrder(node->left);
+        std::cout << "Name: " << node->school.name << ", City: " << node->school.city << ", State: " << node->school.state << "\n";
+        displayInOrder(node->right);
+    }
+
+public:
+    SchoolBST() : root(nullptr) {}
+
+    void insert(School school) { root = insert(root, school); }
+    void deleteByName(std::string name) { root = deleteByName(root, name); }
+
+    void findByName(std::string name) {
+        BSTNode* result = findByName(root, name);
+        if (result)
+            std::cout << "Found: " << result->school.name << ", City: " << result->school.city << ", State: " << result->school.state << "\n";
+        else
+            std::cout << "School not found.\n";
+    }
+
+    void displayInOrder() { displayInOrder(root); }
+};
+
+#endif // SCHOOLBST_H
