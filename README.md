@@ -301,6 +301,100 @@ public:
             std::cout << "School not found.\n";
     }
 
+// SchoolHashTable.h
+#ifndef SCHOOLHASHTABLE_H
+#define SCHOOLHASHTABLE_H
+
+#include <iostream>
+#include <list>
+#include <vector>
+#include <string>
+#include "School.h"
+using namespace std;
+
+class SchoolHashTable {
+private:
+    static const int TABLE_SIZE = 101;
+    vector<list<School>> table;
+
+    int hashFunction(const string& key) {
+        int hash = 0;
+        for (char ch : key) {
+            hash += ch;
+        }
+        return hash % TABLE_SIZE;
+    }
+
+public:
+    SchoolHashTable() {
+        table.resize(TABLE_SIZE);
+    }
+
+    void insert(const School& school) {
+        int index = hashFunction(school.name);
+        table[index].push_back(school);
+    }
+
+    bool deleteByName(const string& name) {
+        int index = hashFunction(name);
+        auto& bucket = table[index];
+        for (auto it = bucket.begin(); it != bucket.end(); ++it) {
+            if (it->name == name) {
+                bucket.erase(it);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    School* findByName(const string& name) {
+        int index = hashFunction(name);
+        auto& bucket = table[index];
+        for (auto& school : bucket) {
+            if (school.name == name) {
+                return &school;
+            }
+        }
+        return nullptr;
+    }
+
+    void displayInOrder() {
+        for (int i = 0; i < TABLE_SIZE; ++i) {
+            if (!table[i].empty()) {
+                cout << "Bucket [" << i << "]:" << endl;
+                for (const auto& school : table[i]) {
+                    cout << "  Name: " << school.name
+                         << ", Address: " << school.address
+                         << ", City: " << school.city
+                         << ", State: " << school.state
+                         << ", County: " << school.county << endl;
+                }
+            }
+        }
+    }
+};
+
+#endif
+
+#ifndef SCHOOL_H
+#define SCHOOL_H
+
+#include <string>
+using namespace std;
+
+struct School {
+    string name;
+    string address;
+    string city;
+    string state;
+    string county;
+
+    School() = default;
+    School(string n, string a, string c, string s, string co)
+        : name(n), address(a), city(c), state(s), county(co) {}
+};
+
+#endif
     void displayInOrder() { displayInOrder(root); }
 };
 
